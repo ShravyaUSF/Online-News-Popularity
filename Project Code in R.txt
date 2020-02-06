@@ -1,0 +1,122 @@
+setwd("C:/Users/Anvitha/Desktop/SDM/Project")
+pop<-read.csv("Online_news.csv")
+pop
+#Linear Regression method (model1)
+model1<-lm(log(pop$shares)~ pop$num_imgs+pop$num_imgs.2+pop$num_videos+pop$n_tokens_content+pop$timedelta+pop$Absolute_Text_Sentiment)
+summary(model1)
+#Assumptions check
+plot(model1$residuals)
+plot(model1)
+#Poisson Model
+glmmodel1<-glm((pop$shares)~ pop$n_tokens_content.2+pop$n_tokens_content+pop$num_imgs+pop$num_imgs.2+pop$num_videos+pop$num_videos.2+ as.factor(pop$Title.S.N.)+as.factor(pop$Text.Sentiment.S.N.)+ as.factor(pop$is_weekend, family = poisson)
+summary(glmmodel1)
+#Quasi-Poisson Model
+
+glmmodel2<-glm((pop$shares)~ pop$n_tokens_content.2+as.factor(pop$Title.S.N.)+as.factor(pop$Text.Sentiment.S.N.)+pop$n_tokens_content+pop$num_imgs+pop$num_imgs.2+pop$num_videos+pop$num_videos.2+as.factor(pop$is_weekend),family = quasipoisson(link = log))
+summary(glmmodel2)
+#Quasi-Poisson Model with interaction
+glmmodel3<-glm((pop$shares)~ pop$n_tokens_content*pop$num_imgs+pop$n_tokens_content.2+as.factor(pop$Title.S.N.)+as.factor(pop$Text.Sentiment.S.N.)+pop$n_tokens_content+pop$num_imgs+pop$num_imgs.2+pop$num_videos+pop$num_videos.2+as.factor(pop$is_weekend),family = quasipoisson(link = log))
+summary(glmmodel3)
+residuals(glmmodel1,type="deviance")
+predict(glmmodel1,type="link")
+#For checking if variance is proportional to mean
+p1Diag <- data.frame(pop,
+link=predict(glmmodel1, type="link"),
+fit=predict(glmmodel1, type="response"),
+pearson=residuals(glmmodel1,type="pearson"),
+resid=residuals(glmmodel1,type="response"),
+residSqr=residuals(glmmodel1,type="response")^2)
+install.packages("ggplot2")
+library(ggplot)
+ggplot(data=p1Diag, aes(x=fit, y=residSqr)) +
+geom_point() +
+geom_abline(intercept = 0, slope = 1) +
+geom_abline(intercept = 0, slope = summary(glmmodel2)$dispersion,color="green")+
+stat_smooth(method="loess", se = FALSE) + theme_bw()
+
+#Entertainment data
+Pop_Entertainment=pop[pop$Data_Channel == 'Entertainment',]
+Pop_Entertainment
+#Entertainment without interaction
+glm_Entertainment_1<-glm(Pop_Entertainment$shares~Pop_Entertainment$n_tokens_content.2+as.factor(Pop_Entertainment$Title.S.N.)+as.factor(Pop_Entertainment$Text.Sentiment.S.N.)+Pop_Entertainment$n_tokens_content+Pop_Entertainment$num_imgs+Pop_Entertainment$num_imgs.2+Pop_Entertainment$num_videos+Pop_Entertainment$num_videos.2+as.factor(Pop_Entertainment$is_weekend),family = quasipoisson(link = log))
+summary(glm_Entertainment_1)
+#Entertainment with interaction
+glm_Entertainment<-glm(Pop_Entertainment$shares~Pop_Entertainment$n_tokens_content*Pop_Entertainment$num_imgs+Pop_Entertainment$n_tokens_content.2+as.factor(Pop_Entertainment$Title.S.N.)+as.factor(Pop_Entertainment$Text.Sentiment.S.N.)+Pop_Entertainment$n_tokens_content+Pop_Entertainment$num_imgs+Pop_Entertainment$num_imgs.2+Pop_Entertainment$num_videos+Pop_Entertainment$num_videos.2+as.factor(Pop_Entertainment$is_weekend),family = quasipoisson(link = log))
+summary(glm_Entertainment)
+# Business data
+Pop_Business=pop[pop$Data_Channel == 'Business',]
+#Business without interaction
+glm_Business_1<-glm(Pop_Business$shares~Pop_Business$n_tokens_content.2+as.factor(Pop_Business$Title.S.N.)+as.factor(Pop_Business$Text.Sentiment.S.N.)+Pop_Business$n_tokens_content+Pop_Business$num_imgs+Pop_Business$num_imgs.2+Pop_Business$num_videos+Pop_Business$num_videos.2+as.factor(Pop_Business$is_weekend),family = quasipoisson(link = log))
+summary(glm_Business_1)
+
+#Business with interaction
+glm_Business<-glm(Pop_Business$shares~Pop_Business$n_tokens_content*Pop_Business$num_imgs+Pop_Business$n_tokens_content.2+as.factor(Pop_Business$Title.S.N.)+as.factor(Pop_Business$Text.Sentiment.S.N.)+Pop_Business$n_tokens_content+Pop_Business$num_imgs+Pop_Business$num_imgs.2+Pop_Business$num_videos+Pop_Business$num_videos.2+as.factor(Pop_Business$is_weekend),family = quasipoisson(link = log))
+summary(glm_Business)
+#LifeStyle data
+Pop_Lifestyle=pop[pop$Data_Channel == 'Lifestyle',]
+#Lifestyle without interaction
+glm_Lifestyle_1<-glm(Pop_Lifestyle$shares~Pop_Lifestyle$n_tokens_content.2+as.factor(Pop_Lifestyle$Title.S.N.)+as.factor(Pop_Lifestyle$Text.Sentiment.S.N.)+Pop_Lifestyle$n_tokens_content+Pop_Lifestyle$num_imgs+Pop_Lifestyle$num_imgs.2+Pop_Lifestyle$num_videos+Pop_Lifestyle$num_videos.2+as.factor(Pop_Lifestyle$is_weekend),family = quasipoisson(link = log))
+summary(glm_Lifestyle_1)
+#Lifestyle with interaction
+glm_Lifestyle<-glm(Pop_Lifestyle$shares~Pop_Lifestyle$n_tokens_content*Pop_Lifestyle$num_imgs+Pop_Lifestyle$n_tokens_content.2+as.factor(Pop_Lifestyle$Title.S.N.)+as.factor(Pop_Lifestyle$Text.Sentiment.S.N.)+Pop_Lifestyle$n_tokens_content+Pop_Lifestyle$num_imgs+Pop_Lifestyle$num_imgs.2+Pop_Lifestyle$num_videos+Pop_Lifestyle$num_videos.2+as.factor(Pop_Lifestyle$is_weekend),family = quasipoisson(link = log))
+summary(glm_Lifestyle)
+#Social_Media data
+Pop_Social_Media=pop[pop$Data_Channel == 'Social Media',]
+
+#Social_Media with interaction
+glm_Social_Media<-glm(Pop_Social_Media$shares~Pop_Social_Media$n_tokens_content*Pop_Social_Media$num_imgs+Pop_Social_Media$n_tokens_content.2+as.factor(Pop_Social_Media$Title.S.N.)+as.factor(Pop_Social_Media$Text.Sentiment.S.N.)+Pop_Social_Media$n_tokens_content+Pop_Social_Media$num_imgs+Pop_Social_Media$num_imgs.2+Pop_Social_Media$num_videos+Pop_Social_Media$num_videos.2+as.factor(Pop_Social_Media$is_weekend),family = quasipoisson(link = log))
+summary(glm_Social_Media)
+#Social_Media without interaction
+glm_Social_Media_1<-glm(Pop_Social_Media$shares~Pop_Social_Media$n_tokens_content.2+as.factor(Pop_Social_Media$Title.S.N.)+as.factor(Pop_Social_Media$Text.Sentiment.S.N.)+Pop_Social_Media$n_tokens_content+Pop_Social_Media$num_imgs+Pop_Social_Media$num_imgs.2+Pop_Social_Media$num_videos+Pop_Social_Media$num_videos.2+as.factor(Pop_Social_Media$is_weekend),family = quasipoisson(link = log))
+summary(glm_Social_Media_1)
+#Technology data
+Pop_Technology=pop[pop$Data_Channel == 'Technology',]
+#Technology with interaction
+glm_Technology<-glm(Pop_Technology$shares~Pop_Technology$n_tokens_content*Pop_Technology$num_imgs+Pop_Technology$n_tokens_content.2+as.factor(Pop_Technology$Title.S.N.)+as.factor(Pop_Technology$Text.Sentiment.S.N.)+Pop_Technology$n_tokens_content+Pop_Technology$num_imgs+Pop_Technology$num_imgs.2+Pop_Technology$num_videos+Pop_Technology$num_videos.2+as.factor(Pop_Technology$is_weekend),family = quasipoisson(link = log))
+summary(glm_Technology)
+#Technology without interaction
+glm_Technology_1<-glm(Pop_Technology$shares~Pop_Technology$n_tokens_content.2+as.factor(Pop_Technology$Title.S.N.)+as.factor(Pop_Technology$Text.Sentiment.S.N.)+Pop_Technology$n_tokens_content+Pop_Technology$num_imgs+Pop_Technology$num_imgs.2+Pop_Technology$nu
+
+m_videos+Pop_Technology$num_videos.2+as.factor(Pop_Technology$is_weekend),family = quasipoisson(link = log))
+summary(glm_Technology_1)
+#World data
+Pop_World=pop[pop$Data_Channel == 'World',]
+#World with interaction
+glm_World<-glm(Pop_World$shares~Pop_World$n_tokens_content*Pop_World$num_imgs+Pop_World$n_tokens_content.2+as.factor(Pop_World$Title.S.N.)+as.factor(Pop_World$Text.Sentiment.S.N.)+Pop_World$n_tokens_content+Pop_World$num_imgs+Pop_World$num_imgs.2+Pop_World$num_videos+Pop_World$num_videos.2+as.factor(Pop_World$is_weekend),family = quasipoisson(link = log))
+summary(glm_World)
+#World without interaction
+glm_World_1<-glm(Pop_World$shares~Pop_World$n_tokens_content.2+as.factor(Pop_World$Title.S.N.)+as.factor(Pop_World$Text.Sentiment.S.N.)+Pop_World$n_tokens_content+Pop_World$num_imgs+Pop_World$num_imgs.2+Pop_World$num_videos+Pop_World$num_videos.2+as.factor(Pop_World$is_weekend),family = quasipoisson(link = log))
+summary(glm_World_1)
+#Other data
+Pop_Other_Data=pop[pop$Data_Channel == 'Other_data',]
+#Other data with interaction
+glm_Other_data<-glm(Pop_Other_Data$shares~Pop_Other_Data$n_tokens_content*Pop_Other_Data$num_imgs+Pop_Other_Data$n_tokens_content.2+as.factor(Pop_Other_Data$Title.S.N.)+as.factor(Pop_Other_Data$Text.Sentiment.S.N.)+Pop_Other_Data$n_tokens_content+Pop_Other_Data$num_imgs+Pop_Other_Data$num_imgs.2+Pop_Other_Data$num_videos+Pop_Other_Data$num_videos.2+as.factor(Pop_Other_Data$is_weekend),family = quasipoisson(link = log))
+summary(glm_Other_data)
+
+#Other data without interaction
+glm_Other_data_1<-glm(Pop_Other_Data$shares~Pop_Other_Data$n_tokens_content.2+as.factor(Pop_Other_Data$Title.S.N.)+as.factor(Pop_Other_Data$Text.Sentiment.S.N.)+Pop_Other_Data$n_tokens_content+Pop_Other_Data$num_imgs+Pop_Other_Data$num_imgs.2+Pop_Other_Data$num_videos+Pop_Other_Data$num_videos.2+as.factor(Pop_Other_Data$is_weekend),family = quasipoisson(link = log))
+summary(glm_Other_data_1)
+install.packages("lmtest")
+library(lmtest)
+R<-coeftest(glmmodel1)
+R
+plot(glmmodel1)
+cor(pop)
+install.packages("car")
+library("car")
+#Divide into Training and Testing data in the ratio 75% to 25%
+require(caTools)
+set.seed(123)
+sample=sample.split(pop,SplitRatio = 0.75)
+train=subset(pop,sample==TRUE)
+View(train)
+testing=subset(pop,sample==FALSE)
+View(testing)
+mod1<-glm((train$shares)~ +train$n_tokens_content*train$num_imgs+train$n_tokens_content.2+as.factor(train$Title.S.N.)+as.factor(train$Text.Sentiment.S.N.)+train$n_tokens_content+train$num_imgs+train$num_imgs.2+train$num_videos+train$num_videos.2+as.factor(train$is_weekend),family = quasipoisson(link = log))
+train<-testing
+prediction<-predict(mod1, newdata=train, type="response")
+
+prediction
+rmse<-sqrt(1/10179*(sum(testing$shares - prediction)^2))
+rmse
+
